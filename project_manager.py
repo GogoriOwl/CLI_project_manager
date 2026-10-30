@@ -21,10 +21,32 @@ def main():
 
         elif user_command == "view task":
             search_id = input("Enter task id ")
-            view_task(tasks, search_id)        
+            view_task(tasks, search_id)
+
+        elif user_command == "change task":
+            while True:
+                if len(tasks) == 0:
+                        print("add tasks first")
+                        break
+                
+                id = input("Enter task id ")
+                for task_id, task in tasks.items():
+                    if task_id == f"task-{id}":
+                         section = input("Enter sections to change ")
+                         to_change = input("Enter text")
+                        
+                         edit_task(tasks, id, section, to_change)
+                         break
+
+                    else: 
+                        print("no tasks found")
+                        break
+
+                       
 
 
 def get_info(tasks):
+        allowed_priorities = ["low", "medium", "high"]
 
         while True:
             task_title = input("Enter title ")
@@ -46,6 +68,9 @@ def get_info(tasks):
             task_priority = input("Enter task priority ")
             if len(task_priority) < 1:
                  continue
+
+            elif task_priority not in allowed_priorities:
+                print("Invalid priority, choose between: low, medium, high")
             
             elif valid_task_input(tasks, "priority", task_priority) == True:
                 break
@@ -102,7 +127,14 @@ def view_task(tasks, search_id):
             print("No tasks found")
 
 
-def edit_task(tasks, task_id):
+def edit_task(tasks, task_id, section, to_change):
+
+    for id, task in tasks.items():
+        if id == f"task-{task_id}":
+            task[section] = to_change
+            print(task)
+
+
 
 
 # Try to use get_into() function in edit_task(), liiks like it's gonna be possible instead of writing additional code
