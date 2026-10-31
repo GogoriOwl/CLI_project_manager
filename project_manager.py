@@ -8,9 +8,9 @@ def main():
 
         if user_command == "add task":
             task_id = len(tasks)
-            task_title, task_description, task_priority, task_tags = get_info(tasks)
+            task_title, task_description, task_priority, task_tags, status = get_info(tasks)
 
-            task = add_task(task_id, task_title, task_description, task_priority, task_tags)
+            task = add_task(task_id, task_title, task_description, task_priority, task_tags, status)
             tasks.update(task)
             print(tasks)
 
@@ -42,14 +42,26 @@ def main():
                         print("no tasks found")
                         break
 
+        elif user_command == "delete task":
+            while True:
+                if len(tasks) == 0:
+                    print("add tasks first")
+                    break
+                else:
+                    id = input("Enter task id ")
+                    delete_task = find_task(tasks, id)
+                    tasks.pop(delete_task)
+                    break
+
                        
 
 
 def get_info(tasks):
         allowed_priorities = ["low", "medium", "high"]
+        allowed_statuses = ["todo", "in progress", "done"]
 
         while True:
-            task_title = input("Enter title ")
+            task_title = input("Enter title ").strip()
             if len(task_title) < 1:
                 continue
             if valid_task_input(tasks, "title", task_title) == True:
@@ -57,7 +69,7 @@ def get_info(tasks):
    
 
         while True:
-            task_description = input("enter description ")
+            task_description = input("enter description ").strip()
             if len(task_description) < 1:
                 continue
             if valid_task_input(tasks, "description", task_description) == True:
@@ -65,7 +77,7 @@ def get_info(tasks):
 
 
         while True:
-            task_priority = input("Enter task priority ")
+            task_priority = input("Enter task priority ").lower().strip()
             if len(task_priority) < 1:
                  continue
 
@@ -75,19 +87,30 @@ def get_info(tasks):
             elif valid_task_input(tasks, "priority", task_priority) == True:
                 break
 
+        while True:
+            task_tags = input("Enter task tags ")
+            if len(task_tags) > 1:
+                break
+
+        while True:
+            task_status = input("Enter status ")
+            if task_status not in allowed_statuses:
+                print("Invalid status, choose between: todo, in progress, done")
+                continue
+            else: break
             
-        task_tags = input("Enter task tags ")
 
-        return task_title, task_description, task_priority, task_tags
+        return task_title, task_description, task_priority, task_tags, task_status
 
 
-def add_task(id, title, description, priority, tags):
+def add_task(id, title, description, priority, tags, status):
     task = {
         f"task-{id}": {
             "title": title,
             "description": description,
             "priority": priority,
             "tags": tags,
+            "status": status,
         }
     }
 
@@ -135,11 +158,15 @@ def edit_task(tasks, task_id, section, to_change):
             print(task)
 
 
+def find_task(tasks, id):
 
+    for task_id, task in tasks.items():
+        if task_id == f"task-{id}":
+            return task_id
 
-# Try to use get_into() function in edit_task(), liiks like it's gonna be possible instead of writing additional code
-# then gonna do the delete_task with pop() function for dict
-#  possibly status validation and mark complete then
+# rewrite all the functions that require looking for the task with find_task()
+#  make mark complete
+# start making search for words in tasks
 
 
 main()
