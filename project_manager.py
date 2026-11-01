@@ -1,7 +1,13 @@
-
+import json
 
 def main():
     tasks = {}
+
+    try:
+        with open("prject_task.json", mode="r") as file:
+            tasks = json.load(file)
+    except FileNotFoundError, json.decoder.JSONDecodeError:
+        pass
 
     while True:
         user_command = input("Enter command ")
@@ -12,7 +18,10 @@ def main():
 
             task = add_task(task_id, task_title, task_description, task_priority, task_tags, status)
             tasks.update(task)
-            print(tasks)
+
+            with open("prject_task.json", mode="w") as file:
+                json.dump(tasks, file)
+
 
         elif user_command == "show tasks":
             if len(tasks) == 0:
@@ -30,6 +39,7 @@ def main():
                         break
                 
                 id = input("Enter task id ")
+                
                 if find_task(tasks, id) == None:
                          break
                 else:
@@ -75,6 +85,14 @@ def main():
                 show_tasks(result)
             else: print("tasks not found")
                        
+
+
+
+
+
+
+
+
 
 
 def get_info(tasks):
