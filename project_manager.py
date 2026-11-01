@@ -30,17 +30,15 @@ def main():
                         break
                 
                 id = input("Enter task id ")
-                for task_id, task in tasks.items():
-                    if task_id == f"task-{id}":
-                         section = input("Enter sections to change ")
-                         to_change = input("Enter text")
-                        
-                         edit_task(tasks, id, section, to_change)
+                if find_task(tasks, id) == None:
                          break
+                else:
+                    section = input("Enter sections to change ")
+                    to_change = input("Enter text")
+                        
+                    edit_task(tasks, id, section, to_change)
+                    break
 
-                    else: 
-                        print("no tasks found")
-                        break
 
         elif user_command == "delete task":
             while True:
@@ -50,9 +48,32 @@ def main():
                 else:
                     id = input("Enter task id ")
                     delete_task = find_task(tasks, id)
-                    tasks.pop(delete_task)
-                    break
+                    if delete_task == None:
+                        break
+                    else:
+                        tasks.pop(delete_task)
+                        break
 
+        elif user_command == "mark done":
+            id = input("Enter the task id ")
+            complete_task = find_task(tasks, id)
+            if complete_task:
+                tasks[complete_task]["status"] = "done"
+
+        elif user_command == "search":
+            search_for = input("Search: ")
+            result = find_corespondance(tasks, search_for)
+
+            for task_id, str in result.items():
+                print(f'{task_id}: {str}', sep="\n")
+
+        elif user_command == "filter":
+            filter_by = input("filter by: ")
+            result = tasks_filter(tasks, filter_by)
+
+            if result:
+                show_tasks(result)
+            else: print("tasks not found")
                        
 
 
@@ -83,9 +104,8 @@ def get_info(tasks):
 
             elif task_priority not in allowed_priorities:
                 print("Invalid priority, choose between: low, medium, high")
-            
-            elif valid_task_input(tasks, "priority", task_priority) == True:
-                break
+                continue
+            else: break
 
         while True:
             task_tags = input("Enter task tags ")
@@ -112,8 +132,7 @@ def add_task(id, title, description, priority, tags, status):
             "tags": tags,
             "status": status,
         }
-    }
-
+    }  
 
     return task
 
@@ -134,6 +153,7 @@ def show_tasks(tasks):
     description: {task["description"]}
     priority: {task["priority"]}
     tags: {task["tags"]}
+    status: {task["status"]}
 
     ''' for task_id, task in tasks.items()), sep="\n\n")
 
@@ -160,13 +180,37 @@ def edit_task(tasks, task_id, section, to_change):
 
 def find_task(tasks, id):
 
-    for task_id, task in tasks.items():
-        if task_id == f"task-{id}":
-            return task_id
+        for task_id, task in tasks.items():
+            if task_id == f"task-{id}":
+                return task_id
 
-# rewrite all the functions that require looking for the task with find_task()
-#  make mark complete
-# start making search for words in tasks
+            else: 
+                print("Task not found")
+            
+
+def find_corespondance(tasks, search_str):
+    result = {}
+
+    for task_id, task in tasks.items():
+        if search_str.lower() in task["description"].lower() or search_str in task["title"].lower() or search_str in task["tags"].lower():
+            result.update({task_id: task["description"]})
+
+
+    return result
+
+def tasks_filter(tasks, requirement):
+    result = {}
+
+    for task_id, task in tasks.items():
+        if task['status'] == requirement or task['priority'] == requirement:
+            result.update({task_id: task})
+
+    return result
+
+
+
+
+# next gonna make persistance + start making pytest
 
 
 main()
