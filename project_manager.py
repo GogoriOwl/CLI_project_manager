@@ -13,7 +13,8 @@ def main():
         user_command = input("Enter command ")
 
         if user_command == "add task":
-            task_id = len(tasks)
+            task_id = get_next_task_id(tasks)
+
             task_title, task_description, task_priority, task_tags, status = get_info(tasks)
 
             task = add_task(task_id, task_title, task_description, task_priority, task_tags, status)
@@ -39,14 +40,18 @@ def main():
                         break
                 
                 id = input("Enter task id ")
-                
+
                 if find_task(tasks, id) == None:
                          break
+                
                 else:
                     section = input("Enter sections to change ")
                     to_change = input("Enter text")
                         
                     edit_task(tasks, id, section, to_change)
+
+                    with open("prject_task.json", mode="w") as file:
+                        json.dump(tasks, file)
                     break
 
 
@@ -62,13 +67,20 @@ def main():
                         break
                     else:
                         tasks.pop(delete_task)
+
+                        with open("prject_task.json", mode="w") as file:
+                            json.dump(tasks, file)
                         break
 
         elif user_command == "mark done":
             id = input("Enter the task id ")
             complete_task = find_task(tasks, id)
+
             if complete_task:
                 tasks[complete_task]["status"] = "done"
+
+                with open("prject_task.json", mode="w") as file:
+                    json.dump(tasks, file)
 
         elif user_command == "search":
             search_for = input("Search: ")
@@ -93,6 +105,16 @@ def main():
 
 
 
+def get_next_task_id(tasks):
+    if not tasks:
+        return 0
+
+    highest_id = max(
+        int(task_id.split("-")[1])
+        for task_id in tasks
+    )
+
+    return highest_id + 1
 
 
 def get_info(tasks):
@@ -125,8 +147,10 @@ def get_info(tasks):
                 continue
             else: break
 
+        task_tags = []
         while True:
-            task_tags = input("Enter task tags ")
+            user_tags = input("Enter task tags ")
+            task_tags.append(user_tags)
             if len(task_tags) > 1:
                 break
 
@@ -184,8 +208,13 @@ def view_task(tasks, search_id):
             priority: {task["priority"]}
             tags: {task["tags"]}
             ''')
+
+            return task
+        
         else:
             print("No tasks found")
+
+        
 
 
 def edit_task(tasks, task_id, section, to_change):
@@ -193,7 +222,7 @@ def edit_task(tasks, task_id, section, to_change):
     for id, task in tasks.items():
         if id == f"task-{task_id}":
             task[section] = to_change
-            print(task)
+            return task
 
 
 def find_task(tasks, id):
@@ -210,9 +239,12 @@ def find_corespondance(tasks, search_str):
     result = {}
 
     for task_id, task in tasks.items():
-        if search_str.lower() in task["description"].lower() or search_str in task["title"].lower() or search_str in task["tags"].lower():
-            result.update({task_id: task["description"]})
-
+        if (
+            search_str.lower() in task["description"].lower()
+            or search_str.lower() in task["title"].lower()
+            or any(search_str.lower() in tag.lower() for tag in task["tags"])
+        ):
+            result[task_id] = task
 
     return result
 
@@ -230,5 +262,5 @@ def tasks_filter(tasks, requirement):
 
 # next gonna make persistance + start making pytest
 
-
-main()
+if __name__ == "__main__":
+    main()
